@@ -1,0 +1,20 @@
+# VERSION: demoapp version
+# DEPLOY: blue OR green
+# Maintainer: MageEdu <mage@magedu.com>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demoapp-svc
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: demoapp
+    ctr: rs-${DEPLOY}
+    version: ${VERSION}
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80

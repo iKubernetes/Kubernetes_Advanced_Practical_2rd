@@ -1,0 +1,163 @@
+# Author: MageEdu <mage@magedu.com>
+# Site: www.magedu.com
+#
+## 是否启用Harbor内部组件间的TLS通信，启用时要求各组件事先配备相应的TLS Secret；
+internalTLS:
+  enabled: true   # 默认为false，对于机密性要求较高的场景可以将其修改为true；
+
+service:  # Harbor服务的整体定义；
+  ## K8s service类型，支持Ingress、ClusterIP、NodePort和LoadBalancer四种取值；
+  type: NodePort   # 默认为LoadBalancer；
+  tls:   # 是否配置启用TLS服务接口；
+    enabled: true
+    ## 指定使用现有的Secret，它必须包含tls.crt和tls.key，可选数据项为ca.crt；
+    existingSecret: ""   # 留空表示将使用自动生成的自签证书；
+    ## 默认Notary将使用上面指定的数字证书，或者使用下面的参数指定专用证书；
+    notaryExistingSecret: ""
+    ## 自动生成证书时在Subject中使用CN名称，未启用Ingress时为必选项；
+    commonName: "hub.ilinux.io"   # 一般要与Core的虚拟主机名称一致；
+  ports:
+    http: 80
+    https: 443
+    notary: 4443   # Notary使用的端口，notary.enabled为true时生效；
+  nodePorts:  # NodePort类型Service的专用参数；
+    http:
+    https:
+    notary:
+  loadBalancerIP:
+  loadBalancerSourceRanges: []
+  externalTrafficPolicy:   # 外部流量的处理策略；
+
+## Ingress 相关的配置参数；
+ingress:
+  enabled: true   # 是否启用Ingress，true意味着将不再运行独立的Nginx代理；
+  hosts:
+    core: hub.ilinux.io   # Portal及Core组件相关的虚拟主机名称；
+    notary: notary.ilinux.io  # Notary组件相关的虚拟主机名称；
+  controller: nginx   # 控制器类型，default可适配大多数类型，我们这里选择使用nginx；
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"   # 通用参数，将http定向至https
+    ingress.kubernetes.io/proxy-body-size: "0"   # proxy协议报文body上限；
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+
+## Harbor Core服务对外的URL，启用Ingress时应该与ingress.hosts.core的值保持
+## 一致，NodePort类型的Service应该使用某节点的IP地址；若位于代理服务器之后，
+## 则应该使用代理服务器的URL；
+externalURL: https://hub.ilinux.io 
+
+persistence:   # 数据持久相关的配置项；
+  enabled: false
+
+## 为了确保upgrade操作正确运行，是否强制用户指定密码，否则将使用随机密码串；
+## true表示将强制要求设定harborAdminPassword、core.secret和secretKey；
+forcePassword: false
+
+harborAdminPassword: MageEdu123   # Harbor上admin用户的初始密码；
+secretKey:   # 组件间基于TLS通信时进行加解密的密钥，必须是16个字符的字符串；
+
+## Harbor专用的代理服务，与Ingress互斥，二者仅用选择其中之一；
+nginx:   # Nginx组件的专用配置；
+  command:   # 自定义要支持的程序；
+  args:   # 向程序传递自定义参数；
+  replicas: 1  # Nginx的Pod副本数，为提升服务可用性通常应该增加其副本数量；
+  ## 仅对使用了RWO PV的场景有用；此种情形下，replicas的值为1时使用滚动更新策略将
+  ## 导致无法正确执行，此时必须要使用Recreate策略；以下几个组件的要求相同；
+  updateStrategy:
+    type: RollingUpdate
+
+portal:  # Portal的相关配置，这里仅保留了副本数和更新策略的定义，后面的组件类似；
+  replicas: 1
+  tls:
+    existingSecret: ""
+
+core:   # Core组件的相关配置；
+  replicas: 1
+  tls:   # 内部组件间TLS通信时启用；
+    existingSecret: ""   # 组件间TLS通信时加载证书和私钥的secret，留空为自动生成；
+  secretName: ""   # 使用自定义的tls.crt和tls.key生成secret；
+
+jobservice:   # jobservice组件相关的配置；
+  replicas: 1
+  maxJobWorkers: 10   # jobservice的最大线程数，应该根据复制的任何量调整；
+  tls:
+    existingSecret: ""
+
+registry:   # registry组件相关的配置；
+  replicas: 1
+  tls:
+    existingSecret: ""
+
+chartmuseum:   # chartmeseum相关的配置；
+  enabled: true   # 是否启用该功能；
+  replicas: 1
+  useRedisCache: true   # 是否使用redis缓存；
+  chartRepoName: "chartsRepo"   # Chart仓库的名称；
+  tls:
+    existingSecret: ""
+
+clair:   # clair相关的配置；
+  enabled: true   # 是否启用该组件；
+  replicas: 1
+
+trivy:   # trivy相关的配置；
+  enabled: true   # 是否启用该组件；
+  replicas: 1
+  tls:
+    existingSecret: ""
+
+notary:   # Notary相关的配置；
+  enabled: true    # 是否启用该组件； 
+  server:   # notary server相关的配置；
+    replicas: 1
+  signer:   # notary signer相关的配置；
+    replicas: 1
+
+redis:   # Harbor Chart自行管理的专用redis组件相关的配置；
+  enabled: true   # 是否启用；
+  ## password: ""
+  usePassword: false   # 是否使用密码；
+  cluster:   # redis cluster相关的配置；
+    enabled: false   # 是否启用cluster；
+  master:
+    persistence:
+      enabled: false # 是否启用持久卷；
+  slave:
+    persistence:
+      enabled: false # 是否启用持久卷；
+
+postgresql:  # Harbor Chart自行管理的专用postgresql组件相关的配置；
+  enabled: true  # 是否启用该组件；
+  postgresqlUsername: postgres   # 数据库服务用户名；
+  postgresqlPassword: not-secure-database-password   # 密码；
+  replication:   # 复制相关的配置；
+    enabled: false   # 是否启用复制功能；
+  persistence:   # 持久卷相关的配置
+    enabled: false   # 是否启用持久卷子 
+
+externalDatabase:   # 启用外部的数据库服务，启用了postgresql就会禁用该功能；
+  host: localhost
+  port: 5432
+  user: bn_harbor   # 用于访问Portal相关数据库的用户名；
+  password: ""   # 密码；
+  sslmode:   # 是否工作于SSL通信模式；
+  coreDatabase:    # core组件相关的数据库名称；
+  clairDatabase:    # clair组件相关的数据库名称；
+  clairUsername:    # 访问clair数据的用户名，默认同Portal的配置；
+  clairPassword:   # 访问clair数据的密码，默认同Portal的配置；
+  notaryServerDatabase:  # notary server组件相关的数据库；
+  notaryServerUsername:
+  notaryServerPassword:
+  notarySignerDatabase:  # notary signer组件相关的数据库；
+  notarySignerUsername:
+  notarySignerPassword:
+
+externalRedis:   # 使用外部的Redis服务；启用redis将禁用externalRedis；
+  host: localhost   # 获取外部Redis服务的主机地址；
+  port: 6379
+  password: ""   # 服务密码；
+  jobserviceDatabaseIndex: "1"   # jobservice使用的数据库名称；
+  registryDatabaseIndex: "2"   # registry使用的数据库名称；
+  chartmuseumDatabaseIndex: "3"   # chartmuseum使用的数据库名称；
+  clairAdapterDatabaseIndex: "4"   # clairAdapter使用的数据库名称；
+  trivyAdapterDatabaseIndex: "5"   # trivyAdapter使用的数据库名称；

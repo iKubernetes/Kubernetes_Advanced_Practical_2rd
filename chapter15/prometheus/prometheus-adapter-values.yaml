@@ -1,0 +1,26 @@
+## helm install adapter -f prometheus-adapter-values.yaml stable/prometheus-adapter -n monitoring
+## stable/prometheus-adapter
+prometheus:
+  url: http://prom-prometheus-server.monitoring.svc.cluster.local
+  port: 80
+  path: ""
+
+replicas: 1
+
+metricsRelistInterval: 1m
+
+listenPort: 6443
+
+service:
+  annotations: {}
+  port: 443
+  type: ClusterIP
+
+tls:
+  enable: false
+  ca: |-
+    # Public CA file that signed the APIService
+  key: |-
+    # Private key of the APIService
+  certificate: |-
+    # Public key of the APIService

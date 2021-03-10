@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-affinity-required
+  namespace: default
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: demoapp
+      ctlr: node-affinity-required
+  template:
+    metadata:
+      labels:
+        app: demoapp
+        ctlr: node-affinity-required
+    spec:
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+        livenessProbe:
+          httpGet:
+            path: '/livez'
+            port: 80
+          initialDelaySeconds: 5
+        readinessProbe:
+          httpGet:
+            path: '/readyz'
+            port: 80
+          initialDelaySeconds: 15
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: gpu
+                operator: Exists
+              - key: node-role.kubernetes.io/master
+                operator: DoesNotExist

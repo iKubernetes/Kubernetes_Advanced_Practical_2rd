@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-demo-0002
+spec:
+  accessModes: ["ReadWriteOnce"]
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 2Gi
+    limits:
+      storage: 5Gi
+  selector:
+    matchLabels:
+      usedof: "redisdata"

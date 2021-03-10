@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-rbd-demo
+  labels:
+    usedof: redisdata
+spec:
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  rbd:
+    monitors:
+    - ceph01.ilinux.io
+    - ceph02.ilinux.io
+    - ceph03.ilinux.io
+    pool: kube
+    image: pv-test
+    user: kube
+    keyring: /etc/ceph/ceph.client.kube.keyring
+    fsType: xfs
+    readOnly: false
+  persistentVolumeReclaimPolicy: Retain

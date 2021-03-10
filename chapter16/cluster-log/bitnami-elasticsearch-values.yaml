@@ -1,0 +1,109 @@
+clusterDomain: cluster.local   # Kubernetes集群域名；
+name: elasticsearch   # Elasticsearch集群名称；
+
+master:   # 准主节点相关的配置；
+  name: master
+  replicas: 2   # 实例数量；
+  heapSize: 512m   # 堆内存大小；
+  resources:
+    limits: {}
+    #   cpu: 1000m
+    #   memory: 2048Mi
+    requests:
+      cpu: 500m
+      memory: 1024Mi
+  persistence:   # 持久卷相关的配置；
+    enabled: true    # 禁用时将自动使用emptyDir存储卷；
+    storageClass: "longhorn"   # 从指定存储类中动态创建PV；
+    # existingClaim: my-persistent-volume-claim   # 使用现有的PVC；
+    # existingVolume: my-persistent-volume    # 使用现有的PV；
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+  service:   # 服务配置
+    type: ClusterIP
+    port: 9300   # 节点间的transport流量使用端口；
+
+coordinating:   # 仅协调节点相关的配置；
+  replicas: 2   # 实例数量；
+  heapSize: 128m
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  service:   # 仅协调节点相关的服务，这也是接收Elasticsearch客户端请求的入口；
+    type: ClusterIP
+    port: 9200
+    # nodePort:
+    # loadBalancerIP:
+
+data:   # 数据节点相关的配置；
+  name: data
+  replicas: 2
+  heapSize: 2048m 
+  resources:   # 数据节点是CPU密集及IO密集型的应用，资源需求和限制要谨慎设定；
+    limits: {}
+    #   cpu: 100m
+    #   memory: 2176Mi
+    requests:
+      cpu: 1000m
+      memory: 2048Mi
+  persistence:
+    enabled: true
+    storageClass: "longhorn"
+    # existingClaim: my-persistent-volume-claim
+    # existingVolume: my-persistent-volume
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+ingest:   # 摄取节点相关的配置；
+  enabled: false   # 默认为禁用状态；
+  name: ingest
+  replicas: 2
+  heapSize: 128m
+  resources:
+    limits: {}
+    #   cpu: 100m
+    #   memory: 384Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+    port: 9300
+
+curator:   # curator相关的配置；
+  enabled: false
+  name: curator
+  cronjob:   # 执行周期及相关的配置；
+    # At 01:00 every day
+    schedule: "0 1 * * *"
+    concurrencyPolicy: ""
+    failedJobsHistoryLimit: ""
+    successfulJobsHistoryLimit: ""
+    jobRestartPolicy: Never
+
+metrics:   # 用于暴露指标的exporter；
+  enabled: true
+  name: metrics
+  service:
+    type: ClusterIP
+    annotations:   # 指标采集相关的注解信息；
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "9114"
+  resources:
+    limits: {}
+    #   cpu: 100m
+    #   memory: 128Mi
+    requests:
+       cpu: 100m
+       memory: 128Mi
+  podAnnotations:   # Pod上的注解，用于支持指标采集；
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+  serviceMonitor:   # Service监控相关的配置
+    enabled: false
+    namespace: monitoring
+    interval: 10s
+    scrapeTimeout: 10s

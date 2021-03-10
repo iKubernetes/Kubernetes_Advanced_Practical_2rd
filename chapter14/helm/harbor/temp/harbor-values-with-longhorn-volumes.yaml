@@ -1,0 +1,96 @@
+ingress:
+  enabled: true
+  hosts:
+    core: hub.ilinux.io
+    notary: notary.ilinux.io
+  controller: nginx
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+
+externalURL: https://hub.ilinux.io
+harborAdminPassword: "MageEdu123"
+
+service:
+  type: NodePort
+  tls:
+    enabled: true
+    existingSecret: ""
+    notaryExistingSecret: ""
+    commonName: "hub.ilinux.io"
+  ports:
+    http: 80
+    https: 443
+    notary: 4443
+  nodePorts:
+    http: 32080
+    https: 32443
+    notary:
+
+
+persistence:
+  enabled: true
+  resourcePolicy: "keep"
+  persistentVolumeClaim:
+    registry:
+      existingClaim: ""
+      storageClass: "longhorn"
+      subPath: ""
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    jobservice:
+      existingClaim: ""
+      storageClass: "longhorn"
+      subPath: ""
+      accessMode: ReadWriteOnce
+      size: 1Gi
+    chartmuseum:
+      existingClaim: ""
+      storageClass: "longhorn"
+      subPath: ""
+      accessMode: ReadWriteOnce
+      size: 5Gi
+    trivy:
+      storageClass: "longhorn"
+      accessMode: ReadWriteOnce
+      size: 5Gi
+
+  imageChartStorage:
+    caBundleSecretName:
+    disableredirect: false
+    type: filesystem
+    filesystem:
+      rootdirectory: /storage
+      maxthreads:
+
+postgresql:
+  persistence:
+    enabled: true
+    mountPath: /bitnami/postgresql
+    storageClass: "longhorn"
+    subPath: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+  
+redis:
+  master:
+    persistence:
+      enabled: true
+      path: /data
+      subPath: ""
+      storageClass: "longhorn"
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
+  slave:
+    persistence:
+      enabled: true
+      path: /data
+      subPath: ""
+      storageClass: "longhorn"
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi

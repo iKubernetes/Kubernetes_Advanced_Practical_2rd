@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-using-hostport
+  namespace: default
+spec:
+  containers:
+  - name: demo
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+      hostPort: 10080

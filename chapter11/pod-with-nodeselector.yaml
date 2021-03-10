@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-nodeselector
+spec:
+  containers:
+  - name: demoapp
+    image: ikubernetes/demoapp:v1.0
+  nodeSelector:
+    gpu: ''

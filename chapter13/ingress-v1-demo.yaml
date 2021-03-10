@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-demo
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  namespace: dev
+spec:
+  rules:
+  - host: www.ik8s.io
+    http:
+      paths:
+      - path: /
+        pathType: Prefix 
+        backend:
+          service:
+            name: ik8s
+            port:
+              number: 80
+  - host: www.ilinux.io
+    http:
+      paths:
+      - path: /foo 
+        pathType: Prefix
+        backend:
+          service:
+            name: foo-svc
+            port:
+              number: 80
+      - path: /bar 
+        pathType: Prefix
+        backend:
+          service:
+            name: bar-svc
+            port: 
+              number: 8080

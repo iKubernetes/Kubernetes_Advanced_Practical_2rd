@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: eshop
+  labels:
+    app: eshop
+    env: dev
+spec:
+  finalizers:
+  - kubernetes

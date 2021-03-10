@@ -1,0 +1,27 @@
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: ClusterConfiguration
+networking:  # 网络定义；
+  serviceSubnet: "10.96.0.0/12"   # Service网络地址；
+  podSubnet: "10.244.0.0/24"   # Pod网络地址；
+  dnsDomain: "cluster.local"   # 集群域名后缀；
+kubernetesVersion: "v1.18.6"   # Kubernetes自身的版本；
+controlPlaneEndpoint: "k8s-api.ilinux.io:6443"  #  控制平面端点；
+apiServer:   # 配置API Server
+  extraArgs:   # 额外指定的参数；
+    authorization-mode: "Node,RBAC"   # 支持的授权机制；
+    kubelet-certificate-authority: /etc/kubernetes/pki/ca.key
+  certSANs:  # API Server服务器端证书的Subject列表；
+  - "k8s-api.ilinux.io"
+  timeoutForControlPlane: 4m0s
+controllerManager:  # 控制器管理器相关的配置
+  extraArgs:
+    node-cidr-mask-size: "24"   # 为节点分配置podCIDR时使用的掩码长度；
+    cluster-signing-cert-file: /etc/kubernetes/pki/ca.crt  # 激活内置签名者；
+    cluster-signing-key-file: /etc/kubernetes/pki/ca.key
+scheduler:   # 调度器相关的配置；
+  extraArgs:
+    address: "127.0.0.1"   # 监听的地址；
+certificatesDir: "/etc/kubernetes/pki"   # 证书文件目录；
+imageRepository: "k8s.gcr.io"   # k8s集群组件镜像文件仓库；
+useHyperKubeImage: false   # 是否使用HyperKubeImage；
+clusterName: "kubernetes"   # 集群名称；

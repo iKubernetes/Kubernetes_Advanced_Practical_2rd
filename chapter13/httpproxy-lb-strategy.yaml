@@ -1,0 +1,18 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-lb-strategy
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: www.ilinux.io
+  routes:
+    - conditions:
+      - prefix: /
+      services:
+        - name: demoapp
+          port: 80
+        - name: demoappv11
+          port: 80
+      loadBalancerPolicy:
+        strategy: Random

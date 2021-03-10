@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volumes-pvc-demo
+  namespace: default
+spec:
+  containers:
+  - name: redis
+    image: redis:alpine
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 6379
+      name: redisport
+    volumeMounts:
+    - mountPath: /data
+      name: redis-rbd-vol
+  volumes:
+  - name: redis-rbd-vol
+    persistentVolumeClaim:
+      claimName: pvc-demo-0002

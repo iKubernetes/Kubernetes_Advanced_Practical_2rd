@@ -1,0 +1,19 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# # URL: http://www.magedu.com
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: securitycontext-runasuser-demo
+  namespace: default
+spec:
+  containers:
+  - name: demo
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: PORT
+      value: "8080"
+    securityContext:
+      runAsUser: 1001
+      runAsGroup: 1001

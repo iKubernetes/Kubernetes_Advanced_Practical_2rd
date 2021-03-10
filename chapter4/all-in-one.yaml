@@ -1,0 +1,64 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# URL: http://www.magedu.com
+apiVersion: v1
+kind: Pod
+metadata:
+  name: all-in-one
+  namespace: default
+spec:
+  initContainers:
+  - name: iptables-init
+    image: ikubernetes/admin-box:latest
+    imagePullPolicy: IfNotPresent
+    command: ['/bin/sh','-c']
+    args: ['iptables -t nat -A PREROUTING -p tcp --dport 8080 -j REDIRECT --to-port 80']
+    securityContext:
+      capabilities:
+        add:
+        - NET_ADMIN
+  containers:
+  - name: sidecar-proxy
+    image: envoyproxy/envoy-alpine:v1.13.1
+    command: ['/bin/sh','-c']
+    args: ['sleep 3 && envoy -c /etc/envoy/envoy.yaml']
+    lifecycle:
+      postStart:
+        exec:
+          command: ['/bin/sh','-c','wget -O /etc/envoy/envoy.yaml http://ilinux.io/envoy.yaml']
+    livenessProbe:
+      tcpSocket:
+        port: 80
+      initialDelaySeconds: 5
+    readinessProbe:
+      tcpSocket:
+        port: 80
+      initialDelaySeconds: 5
+  - name: demo
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: PORT
+      value: '8080'
+    livenessProbe:
+      httpGet:
+        path: '/livez'
+        port: 8080
+      initialDelaySeconds: 5
+    readinessProbe:
+      httpGet:
+        path: '/readyz'
+        port: 8080
+      initialDelaySeconds: 15
+    securityContext:
+      runAsUser: 1001
+      runAsGroup: 1001
+    resources:
+      requests:
+        cpu: 0.5
+        memory: "64Mi"
+      limits:
+        cpu: 2 
+        memory: "1024Mi"
+  securityContext:
+    supplementalGroups: [1002, 1003]
+    fsGroup: 2000

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-dyn-longhorn-demo
+  namespace: default
+spec:
+  accessModes: ["ReadWriteOnce"]
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 2Gi
+    limits:
+      storage: 10Gi
+  storageClassName: longhorn

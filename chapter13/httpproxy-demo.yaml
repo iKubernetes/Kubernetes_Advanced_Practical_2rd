@@ -1,0 +1,18 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-demo
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: www.ilinux.io
+    tls:
+      secretName: tls-ingress-www-ilinux
+      minimumProtocolVersion: "tlsv1.1"
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: demoapp
+      port: 80
+    permitInsecure: true

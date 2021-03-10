@@ -1,0 +1,23 @@
+# VERSION: demoapp version
+# Maintainer: MageEdu <mage@magedu.com>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demoapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demoapp
+  template:
+    metadata:
+      labels:
+        app: demoapp
+    spec:
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+        ports:
+        - containerPort: 80
+          name: http

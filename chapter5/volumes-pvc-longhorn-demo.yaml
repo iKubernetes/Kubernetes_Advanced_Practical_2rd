@@ -1,0 +1,23 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# URL: http://www.magedu.com
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volumes-pvc-longhorn-demo
+  namespace: default
+spec:
+  containers:
+  - name: redis
+    image: redis:alpine
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 6379
+      name: redisport
+    volumeMounts:
+    - mountPath: /data
+      name: redis-data-vol
+  volumes:
+  - name: redis-data-vol
+    persistentVolumeClaim:
+      claimName: pvc-dyn-longhorn-demo

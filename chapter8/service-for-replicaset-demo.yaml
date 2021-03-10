@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: demoapp
+  namespace: default
+spec:
+  type: ClusterIP
+  clusterIP: 10.97.26.1
+  selector:
+    app: demoapp
+    release: stable
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80

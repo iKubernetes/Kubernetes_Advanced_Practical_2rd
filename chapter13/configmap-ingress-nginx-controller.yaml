@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+data:
+  use-gzip: "true" 
+  gzip-level: "6" 
+  worker-processes: "8"  

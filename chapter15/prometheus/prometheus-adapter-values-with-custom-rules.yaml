@@ -1,0 +1,46 @@
+## stable/prometheus-adapter
+prometheus:
+  url: http://prom-prometheus-server.monitoring.svc.cluster.local
+  port: 80
+  path: ""
+
+replicas: 1
+
+metricsRelistInterval: 1m
+
+listenPort: 6443
+
+service:
+  annotations: {}
+  port: 443
+  type: ClusterIP
+
+rules:
+  default: true   # 是否加载默认规则；
+  custom:
+#  - seriesQuery: '{__name__=~"^http_requests_.*",kubernetes_namespace!="",kubernetes_pod_name!=""}'
+#    resources:
+#      overrides:
+#        kubernetes_namespace: {resource: "namespace"}
+#        kubernetes_pod_name: {resource: "pod"}
+#    metricsQuery: '<<.Series>>{<<.LabelMatchers>>}'
+  - seriesQuery: 'http_requests_total{kubernetes_namespace!="",kubernetes_pod_name!=""}'
+    resources:
+      overrides:
+        kubernetes_namespace: {resource: "namespace"}
+        kubernetes_pod_name: {resource: "pod"}
+    name:
+      matches: "^(.*)_total"
+      as: "${1}_per_second"
+    metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'
+  existing:
+  external: []
+
+tls:
+  enable: false
+  ca: |-
+    # Public CA file that signed the APIService
+  key: |-
+    # Private key of the APIService
+  certificate: |-
+    # Public key of the APIService

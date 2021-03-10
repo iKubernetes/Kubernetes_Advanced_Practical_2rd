@@ -1,0 +1,8 @@
+  - name: proxy
+    image: envoyproxy/envoy-alpine:v1.14.1
+    command: ['/bin/sh','-c']
+    args: ['sleep 5 && envoy -c /etc/envoy/envoy.yaml']
+    lifecycle:
+      postStart:
+        exec:
+          command: ['/bin/sh','-c','wget -O /etc/envoy/envoy.yaml http://ilinux.io/envoy.yaml']

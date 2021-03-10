@@ -1,0 +1,22 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-headers-routing
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: www.ilinux.io
+  routes:
+  - conditions:
+    - header:
+        name: X-Canary
+        present: true
+    - header:
+        name: User-Agent
+        contains: curl
+    services:
+    - name: demoappv11
+      port: 80
+  - services:
+    - name: demoapp
+      port: 80

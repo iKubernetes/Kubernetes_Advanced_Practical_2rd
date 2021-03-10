@@ -1,0 +1,58 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: users.auth.ilinux.io
+spec:
+  group: auth.ilinux.io
+  names:
+    kind: User
+    plural: users
+    singular: user
+    shortNames: 
+    - u
+  scope: Namespaced
+  versions:
+  - served: true
+    storage: true
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              userID:
+                type: integer
+                minimum: 1
+                maximum: 65535
+              groups:
+                type: array
+                items:
+                  type: string
+              email:
+                type: string
+              password:
+                type: string
+                format: password
+            required: ["userID","groups"]
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+    additionalPrinterColumns:
+    - name: userID
+      type: integer
+      description: The user ID.
+      jsonPath: .spec.userID
+    - name: groups
+      type: string
+      description: The groups of the user.
+      jsonPath: .spec.groups
+    - name: email
+      type: string
+      description: The email address of the user.
+      jsonPath: .spec.email
+    subresources:
+      status: {}

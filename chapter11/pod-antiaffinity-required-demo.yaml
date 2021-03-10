@@ -1,0 +1,32 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# Version: v0.1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-antiaffinity-required
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: demoapp
+      ctlr: pod-antiaffinity-required
+  template:
+    metadata:
+      labels:
+        app: demoapp
+        ctlr: pod-antiaffinity-required
+    spec:
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - {key: app, operator: In, values: ["demoapp"]}
+              - key: ctlr
+                operator: In
+                values: ["pod-antiaffinity-required"]
+            topologyKey: kubernetes.io/hostname

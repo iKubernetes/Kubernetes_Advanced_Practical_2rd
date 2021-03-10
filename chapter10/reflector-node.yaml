@@ -1,0 +1,11 @@
+apiVersion: projectcalico.org/v3
+kind: Node
+metadata:
+  labels:
+    route-reflector: true
+  name: k8s-master01.ilinux.io
+spec:
+  bgp:
+    ipv4Address: 172.29.9.1/16
+    ipv4IPIPTunnelAddr: 10.244.0.1
+    routeReflectorClusterID: 1.1.1.1

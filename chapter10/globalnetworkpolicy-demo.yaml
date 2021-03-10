@@ -1,0 +1,17 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# http://www.magedu.com
+#
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: namespaces-default
+spec:
+  order: 0.0
+  namespaceSelector: name not in {"kube-system","kubernetes-dashboard","logs","monitoring"}
+  types: ["Ingress", "Egress"]
+  ingress:
+  - action: Allow
+    source:
+      namespaceSelector: name in {"kube-system","kubernetes-dashboard","logs","monitoring"}
+  egress:
+  - action: Allow

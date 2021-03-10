@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-demo
+  namespace: default
+data:
+  demoapp-host: 0.0.0.0
+  demoapp-port: "10080"
+  app.config: |
+    threads = 4
+    connections = 1024

@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmaps-volume-demo2
+  namespace: default
+spec:
+  containers:
+  - name: proxy
+    image: envoyproxy/envoy-alpine:v1.14.1
+    command: ['/bin/sh','-c','envoy -c /etc/envoy/..data/envoy.yaml']
+    volumeMounts:
+    - name: appconfs
+      mountPath: /etc/envoy
+      readOnly: true
+  - name: demo
+    image: ikubernetes/demoapp:v1.0
+    imagePullPolicy: IfNotPresent
+    env:
+    - name: PORT
+      valueFrom:
+        configMapKeyRef:
+          name: demoapp-confs
+          key: demoapp.port
+          optional: false
+    - name: HOST
+      valueFrom:
+        configMapKeyRef:
+          name: demoapp-confs
+          key: demoapp.host
+          optional: true
+  volumes:
+  - name: appconfs
+    configMap:
+      name: demoapp-confs
+      items:
+      - key: envoy.yaml
+        path: envoy.yaml
+        mode: 0644
+      - key: lds.conf
+        path: lds.conf
+        mode: 0644
+      optional: false

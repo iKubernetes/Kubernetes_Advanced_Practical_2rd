@@ -1,0 +1,67 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# Version: v0.1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-preferred
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      ctlr: redis-preferred
+  template:
+    metadata:
+      labels:
+        app: redis
+        ctlr: redis-preferred
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.0-alpine
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pod-affinity-preferred
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: demoapp
+      ctlr: pod-affinity-preferred
+  template:
+    metadata:
+      labels:
+        app: demoapp
+        ctlr: pod-affinity-preferred
+    spec:
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+        resources:
+          requests:
+            cpu: 1500m
+            memory: 1Gi
+      affinity:
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - {key: app, operator: In, values: ["redis"]}
+                - {key: ctlr, operator: In, values: ["redis-prefered"]}
+              topologyKey: kubernetes.io/hostname
+          - weight: 50
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - {key: app, operator: In, values: ["redis"]}
+                - {key: ctlr, operator: In, values: ["redis-prefered"]}
+              topologyKey: rack

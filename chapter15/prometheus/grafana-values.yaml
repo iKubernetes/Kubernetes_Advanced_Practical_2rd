@@ -1,0 +1,85 @@
+## Maintainer: MageEdu <mage@magedu.com>
+## URL: http://www.magedu.com
+## Chart: stable/grafana
+#
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+  annotations:
+    prometheus.io/scrape: "true"
+  labels: {}
+  portName: service
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "3000"
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  path: /
+  hosts:
+    - grafana.ilinux.io
+    - promui.ilinux.io
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+persistence:
+  type: pvc
+  enabled: true
+  storageClassName: "longhorn"
+  accessModes:
+    - ReadWriteOnce
+  size: 10Gi
+  finalizers:
+    - kubernetes.io/pvc-protection
+
+adminUser: admin
+adminPassword: MageEdu.com
+
+plugins: []
+  # - digrich-bubblechart-panel
+  # - grafana-clock-panel
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prom-prometheus-server.monitoring.svc.cluster.local
+      access: proxy
+      isDefault: true
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    Kubernetes-cluster-monitoring:
+      gnetId: 315
+      revision: 3
+      datasource: Prometheus
+    Kubernetes-Nodes:
+      gnetId: 5219
+      revision: 8
+      datasource: Prometheus
+    Kubernetes-Cluster:
+      gnetId: 7249
+      revision: 1
+      datasource: Prometheus
+

@@ -1,0 +1,13 @@
+# PodDisruptionBudget
+# Maintainer: MageEdu <mage@magedu.com>
+---
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: pdb-demo
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: demoapp
+      release: stable

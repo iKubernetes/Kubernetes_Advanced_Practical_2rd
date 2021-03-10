@@ -1,0 +1,11 @@
+## Node Demo
+# Maintainer: MageEdu <mage@magedu.com>
+apiVersion: v1
+kind: Node
+metadata:
+  name: temp-node.ilinux.io
+  labels:
+    kubernetes.io/hostname: temp-node.ilinux.io
+spec:
+  podCIDR: 10.244.6.0/24
+  podCIDRs: [10.244.6.0/24]

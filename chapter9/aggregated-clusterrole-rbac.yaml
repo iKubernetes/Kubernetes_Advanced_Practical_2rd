@@ -1,0 +1,34 @@
+# Maintainer: MageEdu <mage@magedu.com>
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: global-resources-view
+  labels:
+    rbac.ilinux.io/aggregate-to-global-admin: "true"
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "namespaces", "persistentvolumes"]
+  verbs: ["get", "list", "watch"]
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: global-resources-edit
+  labels:
+    rbac.ilinux.io/aggregate-to-global-admin: "true"
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "namespaces", "persistentvolumes"]
+  verbs: ["create", "delete", "deletecollection", "patch", "update"]
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: global-resources-admin
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.ilinux.io/aggregate-to-global-admin: "true"
+rules: []
+---

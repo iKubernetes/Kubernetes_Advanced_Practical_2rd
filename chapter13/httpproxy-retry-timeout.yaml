@@ -1,0 +1,18 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-retry-timeout
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: www.ilinux.io
+  routes:
+  - timeoutPolicy:
+      response: 2s
+      idle: 5s
+    retryPolicy:
+      count: 3
+      perTryTimeout: 500ms
+    services:
+    - name: demoapp
+      port: 80

@@ -1,0 +1,16 @@
+{
+    "apiVersion": "v1",
+    "kind": "Namespace",
+    "metadata": {
+        "creationTimestamp": "2020-03-12T13:11:19Z",
+        "deletionTimestamp": "2020-03-13T00:48:13Z",
+        "name": "demo",
+        "resourceVersion": "786424",
+        "selfLink": "/api/v1/namespaces/demo",
+        "uid": "15b970cf-384a-474c-8780-680b3b041802"
+    },
+    "spec": {},
+    "status": {
+        "phase": "Terminating"
+    }
+}

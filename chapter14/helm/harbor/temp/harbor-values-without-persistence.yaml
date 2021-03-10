@@ -1,0 +1,42 @@
+ingress:
+  enabled: true
+  hosts:
+    core: hub.ilinux.io
+    notary: notary.ilinux.io
+  controller: nginx
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+
+externalURL: https://hub.ilinux.io
+harborAdminPassword: "MageEdu123"
+
+service:
+  type: ClusterIP
+  tls:
+    enabled: true
+    existingSecret: ""
+    notaryExistingSecret: ""
+    commonName: "hub.ilinux.io"
+  ports:
+    http: 80
+    https: 443
+    notary: 4443
+
+persistence:
+  enabled: false
+
+# Values for Dependencies.
+postgresql:
+  persistence:
+    enabled: false
+  
+redis:
+  master:
+    persistence:
+      enabled: false
+  slave:
+    persistence:
+      enabled: false

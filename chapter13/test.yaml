@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: demoapp-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  namespace: dev
+spec:
+  rules:
+  - host: demoapp.ilinux.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: demoapp
+          servicePort: 80
+  tls:
+  - hosts:
+    - demoapp.ilinux.io
+    secretName: tls-ingress-demoapp-ilinux

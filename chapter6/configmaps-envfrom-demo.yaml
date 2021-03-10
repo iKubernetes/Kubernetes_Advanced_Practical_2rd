@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demoapp-config-for-envfrom
+  namespace: default
+data:
+  PORT: "8090"
+  HOST: 0.0.0.0
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmaps-envfrom-demo
+  namespace: default
+spec:
+  containers:
+  - image: ikubernetes/demoapp:v1.0
+    name: demoapp
+    envFrom:
+    - configMapRef:
+        name: demoapp-config-for-envfrom
+        optional: false

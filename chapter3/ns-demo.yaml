@@ -1,0 +1,9 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# URL: http://www.magedu.com
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+spec:
+  finalizers:
+  - kubernetes

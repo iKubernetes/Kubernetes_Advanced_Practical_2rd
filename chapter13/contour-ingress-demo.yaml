@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: contour-ingress-demo
+  annotations:
+    kubernetes.io/ingress.class: "contour"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  namespace: dev
+spec:
+  rules:
+  - host: www.ilinux.io
+    http:
+      paths:
+      - path: / 
+        backend:
+          serviceName: demoapp
+          servicePort: 80
+  tls:
+  - hosts:
+    - www.ilinux.io
+    secretName: tls-ingress-www-ilinux

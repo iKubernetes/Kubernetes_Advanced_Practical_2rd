@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-demo
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  namespace: dev
+spec:
+  rules:
+  - host: www.ik8s.io
+    http:
+      paths:
+      - path: 
+        backend:
+          serviceName: ik8s
+          servicePort: 80
+  - host: www.ilinux.io
+    http:
+      paths:
+      - path: /foo 
+        backend:
+          serviceName: foo-svc
+          servicePort: 80
+      - path: /bar 
+        backend:
+          serviceName: bar-svc
+          servicePort: 8080
+  tls:
+  - hosts:
+    - www.ik8s.io
+    secretName: tls-ik8s
+  backend:
+    serviceName: default-backend
+    servicePort: 80

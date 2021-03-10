@@ -1,0 +1,59 @@
+clusterName: "elasticsearch"
+nodeGroup: "master"
+
+roles:
+  master: "true"
+  ingest: "true"
+  data: "true"
+
+replicas: 3
+minimumMasterNodes: 2
+
+esJavaOpts: "-Xmx1g -Xms1g"
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2Gi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+networkHost: "0.0.0.0"
+
+volumeClaimTemplate:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 5Gi
+
+persistence:
+  enabled: true
+  labels:
+    enabled: false
+  annotations: {}
+
+protocol: http
+httpPort: 9200
+transportPort: 9300
+
+
+service:
+  type: ClusterIP
+  nodePort: ""
+  httpPortName: http
+  transportPortName: transport
+  loadBalancerIP: ""
+
+ingress:
+  enabled: false
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - log.ilinux.io
+  tls: []
+  #  - secretName: log-tls
+  #    hosts:
+  #      - log.ilinux.io

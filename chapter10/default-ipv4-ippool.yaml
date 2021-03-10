@@ -1,0 +1,11 @@
+apiVersion: projectcalico.org/v3
+kind: IPPool
+metadata:
+  name: default-ipv4-ippool
+spec:
+  blockSize: 24
+  cidr: 10.244.0.0/16
+  ipipMode: CrossSubnet
+  natOutgoing: true
+  nodeSelector: all()
+  vxlanMode: Never

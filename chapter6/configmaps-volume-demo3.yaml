@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-volume-demo3
+  namespace: default
+spec:
+  containers:
+  - image: nginx:alpine
+    name: nginx-server
+    volumeMounts:
+    - name: ngxconfs
+      mountPath: /etc/nginx/conf.d/myserver.conf
+      subPath: myserver.conf
+      readOnly: true
+    - name: ngxconfs
+      mountPath: /etc/nginx/conf.d/myserver-gzip.cfg
+      subPath: myserver-gzip.cfg
+      readOnly: true
+  volumes:
+  - name: ngxconfs
+    configMap:
+      name: nginx-config-files

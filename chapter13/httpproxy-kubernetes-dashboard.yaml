@@ -1,0 +1,14 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: dashboard
+  namespace: kubernetes-dashboard
+spec:
+  virtualhost:
+    fqdn: dashboard.ilinux.io
+    tls:
+      passthrough: true
+  tcpproxy:
+    services:
+    - name: kubernetes-dashboard
+      port: 443

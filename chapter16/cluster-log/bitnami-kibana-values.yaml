@@ -1,0 +1,65 @@
+replicaCount: 1
+
+updateStrategy:
+  type: RollingUpdate
+
+plugins:
+  - https://github.com/pjhampton/kibana-prometheus-exporter/releases/download/7.8.1/kibana-prometheus-exporter-7.8.1.zip
+
+persistence:
+  enabled: true
+  storageClass: "longhorn"
+  # existingClaim: your-claim
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+service:
+  port: 5601
+  type: ClusterIP
+  # nodePort:
+  externalTrafficPolicy: Cluster
+  annotations: {}
+  # loadBalancerIP:
+  # extraPorts:
+
+ingress:
+  enabled: true
+  certManager: false
+  annotations:
+    kubernetes.io/ingress.class: nginx
+
+  hosts:
+    - name: kibana.ilinux.io
+      path: /
+      tls: false
+      # tlsHosts:
+      #   - www.kibana.local
+      #   - kibana.local
+      # tlsSecret: kibana.local-tls
+
+configuration:
+  server:
+    basePath: ""
+    rewriteBasePath: false
+
+metrics:
+  enabled: true
+  service:
+    annotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "80"
+      prometheus.io/path: "_prometheus/metrics"
+
+  serviceMonitor:
+    enabled: false
+    # namespace: monitoring
+    # interval: 10s
+    # scrapeTimeout: 10s
+    # selector:
+    #   prometheus: my-prometheus
+
+elasticsearch:
+  hosts:
+  - es-elasticsearch-coordinating-only.logging.svc.cluster.local.
+  # - elasticsearch-2
+  port: 9200

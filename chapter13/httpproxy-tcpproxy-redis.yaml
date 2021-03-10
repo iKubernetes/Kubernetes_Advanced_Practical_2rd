@@ -1,0 +1,14 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-tcpproxy-redis
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: redis.ilinux.io
+    tls:
+      passthrough: true
+  tcpproxy:
+    services:
+    - name: redis
+      port: 6379

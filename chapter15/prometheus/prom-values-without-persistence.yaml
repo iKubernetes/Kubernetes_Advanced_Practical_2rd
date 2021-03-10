@@ -1,0 +1,242 @@
+alertmanager:
+  enabled: true
+  baseURL: "http://localhost:9093"
+  configFileName: alertmanager.yml
+  useClusterRole: true
+  useExistingClusterRoleName: cluster-admin
+  ingress:
+    enabled: true
+
+    ## Must be provided if Ingress is enabled
+    hosts:
+      - prom.ilinux.io/alertmgr
+      - alertmgr.ilinux.io
+
+  persistentVolume:
+    enabled: false
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
+    mountPath: /data
+    size: 2Gi
+    storageClass: "longhorn"
+    # volumeBindingMode: ""
+  replicaCount: 1
+  statefulSet:
+    ## If true, use a statefulset instead of a deployment for pod management.
+    ## This allows to scale replicas to more than 1 pod
+    ##
+    enabled: false
+    podManagementPolicy: OrderedReady
+
+kubeStateMetrics:
+  ## If false, kube-state-metrics sub-chart will not be installed
+  ##
+  enabled: true
+
+kube-state-metrics:
+  prometheusScrape: true
+  autosharding:
+    enabled: false
+  replicas: 1
+  hostNetwork: false
+  service:
+    port: 8080
+    type: ClusterIP
+    nodePort: 0
+    loadBalancerIP: ""
+
+nodeExporter:
+  ## If false, node-exporter will not be installed
+  ##
+  enabled: true
+  hostNetwork: true
+  hostPID: true
+
+  service:
+    annotations:
+      prometheus.io/scrape: "true"
+    labels: {}
+
+    clusterIP: None
+    externalIPs: []
+    hostPort: 9100
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    servicePort: 9100
+    type: ClusterIP
+
+server:
+  enabled: true
+
+  useClusterRole: true
+  useExistingClusterRoleName: cluster-admin
+
+  ## External URL which can access alertmanager
+  ## Maybe same with Ingress host name
+  baseURL: ""
+
+  configPath: /etc/config/prometheus.yml
+  global:
+    scrape_interval: 1m
+    scrape_timeout: 10s
+    evaluation_interval: 1m
+  remoteWrite: []
+  remoteRead: []
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - prom.ilinux.io
+    #   - domain.com/prometheus
+
+    ## Secrets must be manually created in the namespace
+    ##
+    tls: []
+    #   - secretName: prometheus-server-tls
+    #     hosts:
+    #       - prometheus.domain.com
+
+  persistentVolume:
+    ## If true, Prometheus server will create/use a Persistent Volume Claim
+    ## If false, use emptyDir
+    ##
+    enabled: false
+    accessModes:
+      - ReadWriteOnce
+    existingClaim: ""
+    mountPath: /data
+    size: 8Gi
+    # storageClass: "-"
+    # volumeBindingMode: ""
+    subPath: ""
+
+  emptyDir:
+    sizeLimit: ""
+
+  ## Prometheus AlertManager configuration
+  ##
+  alertmanagers: []
+
+  ## Use a StatefulSet if replicaCount needs to be greater than 1 (see below)
+  ##
+  replicaCount: 1
+  statefulSet:
+    enabled: false
+
+    podManagementPolicy: OrderedReady
+
+    headless:
+      servicePort: 80
+      ## Enable gRPC port on service to allow auto discovery with thanos-querier
+      gRPC:
+        enabled: false
+        servicePort: 10901
+        # nodePort: 10901
+
+  ## Prometheus server readiness and liveness probe initial delay and timeout
+  readinessProbeInitialDelay: 30
+  readinessProbePeriodSeconds: 5
+  readinessProbeTimeout: 30
+  readinessProbeFailureThreshold: 3
+  readinessProbeSuccessThreshold: 1
+  livenessProbeInitialDelay: 30
+  livenessProbePeriodSeconds: 15
+  livenessProbeTimeout: 30
+  livenessProbeFailureThreshold: 3
+  livenessProbeSuccessThreshold: 1
+
+  service:
+    clusterIP: ""
+    externalIPs: []
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    servicePort: 80
+    sessionAffinity: None
+    type: ClusterIP
+
+    ## Enable gRPC port on service to allow auto discovery with thanos-querier
+    gRPC:
+      enabled: false
+      servicePort: 10901
+      # nodePort: 10901
+
+    ## If using a statefulSet (statefulSet.enabled=true), configure the
+    ## service to connect to a specific replica to have a consistent view
+    ## of the data.
+    statefulsetReplica:
+      enabled: false
+      replica: 0
+
+  ## Prometheus data retention period (default if not specified is 15 days)
+  ##
+  retention: "15d"
+
+pushgateway:
+  ## If false, pushgateway will not be installed
+  ##
+  enabled: true
+  name: pushgateway
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+
+    hosts:
+      - prom.ilinux.io/pushgw
+      - pushgw.ilinux.io
+
+    tls: []
+    #   - secretName: prometheus-alerts-tls
+    #     hosts:
+    #       - pushgateway.domain.com
+  replicaCount: 1
+
+  persistentVolume:
+    ## If true, pushgateway will create/use a Persistent Volume Claim
+    ## If false, use emptyDir
+    ##
+    enabled: false
+
+    accessModes:
+      - ReadWriteOnce
+
+    existingClaim: ""
+    mountPath: /data
+    size: 2Gi
+
+    # storageClass: "-"
+    # volumeBindingMode: ""
+
+extraScrapeConfigs:
+  # - job_name: 'prometheus-blackbox-exporter'
+  #   metrics_path: /probe
+  #   params:
+  #     module: [http_2xx]
+  #   static_configs:
+  #     - targets:
+  #       - https://example.com
+  #   relabel_configs:
+  #     - source_labels: [__address__]
+  #       target_label: __param_target
+  #     - source_labels: [__param_target]
+  #       target_label: instance
+  #     - target_label: __address__
+  #       replacement: prometheus-blackbox-exporter:9115
+
+# Adds option to add alert_relabel_configs to avoid duplicate alerts in alertmanager
+# useful in H/A prometheus with different external labels but the same alerts
+alertRelabelConfigs:
+  # alert_relabel_configs:
+  # - source_labels: [dc]
+  #   regex: (.+)\d+
+  #   target_label: dc
+
+networkPolicy:
+  ## Enable creation of NetworkPolicy resources.
+  ##
+  enabled: false
+
+# Force namespace of namespaced resources
+forceNamespace: null

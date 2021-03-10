@@ -1,0 +1,17 @@
+NAME: hub
+LAST DEPLOYED: Fri Jul 24 10:05:23 2020
+NAMESPACE: harbor
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+** Please be patient while the chart is being deployed **
+
+1. Get the Harbor URL:
+
+  You should be able to access your new Harbor installation through https://hub.ilinux.io
+
+2. Login with the following credentials to see your Harbor application
+
+  echo Username: "admin"
+  echo Password: $(kubectl get secret --namespace harbor hub-harbor-core-envvars -o jsonpath="{.data.HARBOR_ADMIN_PASSWORD}" | base64 --decode)

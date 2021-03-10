@@ -1,0 +1,10 @@
+- op: replace
+  path: /spec/ports/0/targetPort
+  value: 8080
+- op: add
+  path: /spec/ports/1
+  value:
+    name: https
+    protocol: TCP
+    port: 443
+    targetPort: 8443

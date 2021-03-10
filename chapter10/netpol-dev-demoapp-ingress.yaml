@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: demoapp-ingress
+  namespace: dev
+spec:
+  podSelector:
+    matchLabels:
+      app: demoapp
+  policyTypes: ["Ingress"]
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchExpressions:
+        - key: name
+          operator: In
+          values: [dev, kube-system, logs, monitoring, kubernetes-dashboard]
+    - ipBlock:
+        cidr: 10.244.0.0/24
+  - from:
+    - namespaceSelector:
+        matchExpressions:
+        - {key: name, operator: NotIn, values: ["default"]}
+    ports:
+    - protocol: TCP
+      port: 80

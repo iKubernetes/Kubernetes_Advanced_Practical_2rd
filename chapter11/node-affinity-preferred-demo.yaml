@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-affinity-preferred
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: demoapp
+      ctlr: node-affinity-preferred
+  template:
+    metadata:
+      name: demoapp
+      labels:
+        app: demoapp
+        ctlr: node-affinity-preferred
+    spec:
+      containers:
+      - name: demoapp
+        image: ikubernetes/demoapp:v1.0
+        resources:
+          requests:
+            cpu: 1500m
+            memory: 1Gi
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 60
+            preference:
+              matchExpressions:
+              - key: gpu
+                operator: Exists
+          - weight: 30
+            preference:
+              matchExpressions:
+              - key: region
+                operator: In
+                values: ["foo","bar"]

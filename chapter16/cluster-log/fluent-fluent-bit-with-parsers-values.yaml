@@ -1,0 +1,109 @@
+# kind -- DaemonSet or Deployment
+kind: DaemonSet
+
+image:
+  repository: fluent/fluent-bit
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 2020
+  annotations:
+    prometheus.io/path: "/api/v1/metrics/prometheus"
+    prometheus.io/port: "2020"
+    prometheus.io/scrape: "true"
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  #requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+tolerations:
+  - key: node-role.kubernetes.io/master
+    effect: NoSchedule
+
+config:
+  service: |
+    [SERVICE]
+        Flush 3
+        Daemon Off
+        #Log_Level info
+        Log_Level debug
+        Parsers_File custom_parsers.conf
+        Parsers_File parsers.conf
+        HTTP_Server On
+        HTTP_Listen 0.0.0.0
+        HTTP_Port 2020
+
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*.log
+        Parser cri
+        Tag kube.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+        Refresh_Interval  10
+
+    [INPUT]
+        Name systemd
+        Tag host.*
+        Systemd_Filter _SYSTEMD_UNIT=kubelet.service
+        Systemd_Filter _SYSTEMD_UNIT=docker.service
+        Systemd_Filter _SYSTEMD_UNIT=node-problem-detector.service
+        Read_From_Tail On
+
+  filters: |
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+        Kube_Tag_Prefix     kube.var.log.containers.
+        Merge_Log           On
+        Merge_Parser        catchall
+        Keep_Log            Off
+        K8S-Logging.Exclude On
+
+  outputs: |
+    [OUTPUT]
+        Name es
+        Match kube.*
+        Host es-elasticsearch-coordinating-only.logging.svc.cluster.local.
+        Logstash_Format On
+        Logstash_Prefix k8s-cluster
+        Type  flb_type
+        Replace_Dots On
+
+    [OUTPUT]
+        Name es
+        Match host.*
+        Host es-elasticsearch-coordinating-only.logging.svc.cluster.local.
+        Logstash_Format On
+        Logstash_Prefix k8s-node
+        Type  flb_type
+        Replace_Dots On
+
+  customParsers: |
+    [PARSER]
+        Name docker_no_time
+        Format json
+        Time_Keep Off
+        Time_Key time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+
+    [PARSER]
+        Name        ingress-nginx
+        Format      regex
+        Regex       ^(?<message>(?<remote>[^ ]*) - (?<user>[^ ]*) \[(?<time>[^\]]*)\] "(?<method>\S+)(?: +(?<path>[^\"]*?)(?: +\S*)?)?" (?<code>[^ ]*) (?<size>[^ ]*) "(?<referer>[^\"]*)" "(?<agent>[^\"]*)" (?<request_length>[^ ]*) (?<request_time>[^ ]*) \[(?<proxy_upstream_name>[^ ]*)\] \[(?<proxy_alternative_upstream_name>[^ ]*)\] (?<upstream_addr>[^ ]*) (?<upstream_response_length>[^ ]*) (?<upstream_response_time>[^ ]*) (?<upstream_status>[^ ]*) (?<req_id>[^ ]*).*)$
+        Time_Key    time
+        Time_Format %d/%b/%Y:%H:%M:%S %z
+
+    [PARSER]
+        Name    catchall
+        Format  regex
+        Regex   ^(?<message>.*)$

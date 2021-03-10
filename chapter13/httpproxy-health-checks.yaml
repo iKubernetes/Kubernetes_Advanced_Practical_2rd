@@ -1,0 +1,22 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: httpproxy-health-check
+  namespace: dev
+spec:
+  virtualhost:
+    fqdn: www.ilinux.io
+  routes:
+  - conditions:
+    - prefix: /
+    healthCheckPolicy:
+      path: /
+      intervalSeconds: 5
+      timeoutSeconds: 2
+      unhealthyThresholdCount: 3
+      healthyThresholdCount: 5
+    services:
+      - name: demoapp
+        port: 80
+      - name: demoappv11
+        port: 80

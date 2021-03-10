@@ -1,0 +1,25 @@
+# Maintainer: MageEdu <mage@magedu.com>
+# URL: http://www.magedu.com
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: volumes-glusterfs-demo
+  labels:
+    app: redis
+spec:
+  containers:
+  - name: redis
+    image: redis:alpine
+    ports:
+    - containerPort: 6379
+      name: redisport
+    volumeMounts:
+    - mountPath: /data
+      name: redisdata
+  volumes:
+    - name: redisdata
+      glusterfs:
+        endpoints: glusterfs-endpoints
+        path: kube-redis
+        readOnly: false
