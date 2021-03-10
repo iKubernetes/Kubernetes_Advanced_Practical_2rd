@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: wordpress
+  labels:
+    app: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+      tier: proxy
+  template:
+    metadata:
+      labels:
+        app: nginx
+        tier: proxy
+    spec:
+      containers:
+      - image: nginx:alpine 
+        name: nginx
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+          name: http
+        - containerPort: 443
+          name: https
+        volumeMounts:
+        - name: nginxconf
+          mountPath: /etc/nginx/conf.d/
+        - name: nginxcert
+          mountPath: /etc/nginx/certs/
+      volumes:
+      - name: nginxconf
+        configMap:
+          name: nginx-conf
+      - name: nginxcert
+        secret:
+          secretName: nginx-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: wordpress
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    name: http
+  - port: 443
+    targetPort: 443
+    name: https
+  selector:
+    app: nginx
+    tier: proxy
+  type: NodePort

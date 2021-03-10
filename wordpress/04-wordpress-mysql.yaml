@@ -1,0 +1,69 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  namespace: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: root.password
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: user.username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: user.password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: wordpress.db.name
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysqlstor
+          mountPath: /var/lib/mysql
+          subPath: data
+      volumes:
+      - name: mysqlstor
+        persistentVolumeClaim:
+          claimName: wordpress-mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  namespace: wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+---

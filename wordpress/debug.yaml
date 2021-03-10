@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: admin-box
+  namespace: wordpress
+spec:
+  containers:
+  - image: ikubernetes/admin-box:latest
+    name: debug
+    imagePullPolicy: IfNotPresent
+    command: ["/bin/sh","-c"]
+    args: ["sleep 999999"]
+    volumeMounts:
+    - name: mysqlstor
+      mountPath: /var/lib/mysql
+  volumes:
+  - name: mysqlstor
+    persistentVolumeClaim:
+      claimName: wordpress-mysql-pvc

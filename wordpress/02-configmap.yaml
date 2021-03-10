@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  namespace: wordpress
+data:
+  myserver.conf: |
+    server {
+        server_name www.magedu.com;
+        root /usr/share/nginx/html;
+    
+        listen 443 ssl;
+        ssl_certificate /etc/nginx/certs/tls.crt;
+        ssl_certificate_key /etc/nginx/certs/tls.key;
+    
+        location / { 
+            proxy_pass http://wordpress:80;
+        }
+    }
+     
+    server {
+        listen 80;
+        root /usr/share/nginx/html;
+        server_name www.magedu.com;
+        location / {
+            proxy_pass http://wordpress:80;
+        }
+    }

@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wordpress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress-pvc
+  namespace: wordpress
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn-nfs
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress-mysql-pvc
+  namespace: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: v1
+data:
+  root.password: TWFnRWR1LmMwbQ==  # root password: MagEdu.c0m
+  user.password: d3BQQHNz  # wordpress user name: wordpress
+  user.username: d29yZHByZXNz  # wordpress user password: wpP@ss
+  wordpress.db.name: d3BQQHNz  # wordpress database name: wordpress
+kind: Secret
+metadata:
+  name: mysql-password
+  namespace: wordpress
+type: Opaque
+---
+apiVersion: apps/v1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  namespace: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.7
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: root.password
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: user.username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: user.password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: wordpress.db.name
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysqlstor
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysqlstor
+        persistentVolumeClaim:
+          claimName: wordpress-mysql-pvc
