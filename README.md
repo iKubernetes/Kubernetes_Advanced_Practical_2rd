@@ -14,5 +14,5 @@
 
 ## 《Kubernetes进阶实战第2版》图书封面
 
-[图书封面](https://github.com/iKubernetes/Kubernetes_Advanced_Practical_2rd/raw/main/imgs/book.jpg)
+![图书封面](https://github.com/iKubernetes/Kubernetes_Advanced_Practical_2rd/raw/main/imgs/book.jpg)
 
