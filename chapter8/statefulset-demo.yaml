@@ -25,7 +25,7 @@ spec:
       controller: sts-demo
   template:
     metadata:
-    labels:
+      labels:
         app: demoapp
         controller: sts-demo
     spec:
