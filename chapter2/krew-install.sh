@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x; cd "$(mktemp -d)
+set -x; cd "$(mktemp -d)"
 
 curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.{tar.gz,yaml}" 
 tar zxvf krew.tar.gz 
