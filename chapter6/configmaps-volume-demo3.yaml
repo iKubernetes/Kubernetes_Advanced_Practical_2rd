@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: configmap-volume-demo3
+  name: configmaps-volume-demo3
   namespace: default
 spec:
   containers:
