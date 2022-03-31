@@ -8,7 +8,7 @@ spec:
   - name: config-file-downloader
     image: ikubernetes/admin-box
     imagePullPolicy: IfNotPresent
-    command: ['/bin/sh','-c','wget -O /data/envoy.yaml http://ilinux.io/envoy.yaml']
+    command: ['/bin/sh','-c','wget -O /data/envoy.yaml https://raw.githubusercontent.com/iKubernetes/Kubernetes_Advanced_Practical_2rd/main/chapter4/envoy.yaml']
     volumeMounts:
     - name: config-file-store
       mountPath: /data
